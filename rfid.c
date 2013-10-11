@@ -13,15 +13,20 @@ int initUART1_TXD();
 int initUART1_RXD();
 int setSerial();
 int readCharSet();
-int sendCharSet(unsigned char *msg, char size);
+int sendCharSet(unsigned char *msg, int size);
 void signal_handler(int sig);
 
-void rfidBootFirmware();
-void rfidGetFirmware();
-void rfidSetTagProtocol();
-void rfidReadSingle();
-void rfidReadMultiple();
-void rfidSetAntenna();
+void rGetFirmware();
+void rBootFirmware();
+void rGetTagProtocol();
+void rGetProgram();
+void rSetTagProtocol();
+void rReadSingle();
+void rReadMultiple();
+void rSetAntenna();
+void rSetRegion();
+void rGetAntenna();
+void rGetRegion();
 
 int keepgoing = 1;	// Set to 0 when ctrl-c is pressed
 
@@ -66,15 +71,29 @@ int main(){
     else
         printf("\n Thread created successfully\n");
 
+	//rGetFirmware();
+	rBootFirmware();
+	rGetProgram();
 	sleep(1);
-	rfidSetAntenna();
-	rfidSetTagProtocol();
+	rGetRegion();
+	rSetRegion();
+	sleep(1);
+	rGetRegion();
+	rGetAntenna();
+	rSetAntenna();
+	sleep(1);
+	rGetAntenna();
+	rGetTagProtocol();
+	rSetTagProtocol();
+	sleep(1);
+	rGetTagProtocol();
 	while(keepgoing){
 		sleep(1);
         printf("\n Sending start\n");
-		//rfidGetFirmware();
-		//rfidReadSingle();
-		rfidReadMultiple();
+	//rGetFirmware();
+		//rReadSingle();
+		rReadMultiple();
+		//rGetProgram();
 		sleep(1);
 	}
 	return 0;
@@ -215,9 +234,9 @@ int readCharSet() {
 /****************************************************************
 * Send a set of 5 characters without parity check
 ****************************************************************/
-int sendCharSet(unsigned char *msg, char size) {
+int sendCharSet(unsigned char *msg, int size) {
 	struct termios Serial;
-//	int size = strlen(&msg);	//Note: This may cause error when msg==0!
+	//int size = strlen(&msg);	//Note: This may cause error when msg==0!
 	int fd;
 	if ((fd = open("/dev/ttyO1", O_RDWR | O_NOCTTY)) < 0){
 		printf("Could not open ttyO1.\n");
@@ -246,47 +265,88 @@ void signal_handler(int sig) {
 /****************************************************************
 * Get Firmware Version (03h)
 *****************************************************************/
-void rfidGetFirmware() {
+void rGetFirmware() {
 	unsigned char msg[]={0xFF, 0x00, 0x03, 0x1D, 0x0C};
-	sendCharSet(msg, 5);
+	sendCharSet(msg, sizeof(msg));
+}
+
+/****************************************************************
+* Boot Firmware (04h)
+*****************************************************************/
+void rBootFirmware() {
+	unsigned char msg[]={0xFF, 0x00, 0x04, 0x1D, 0x0B};
+	sendCharSet(msg, sizeof(msg));
+	sleep(1);
+}
+
+/****************************************************************
+* Get Current Program (0Ch)
+*****************************************************************/
+void rGetProgram() {
+	unsigned char msg[]={0xFF, 0x00, 0x0C, 0x1D, 0x03};
+	sendCharSet(msg, sizeof(msg));
+}
+
+/****************************************************************
+* Get Antenna (61h)
+*****************************************************************/
+void rGetAntenna() {
+	unsigned char msg[]={0xFF, 0x01, 0x61, 0x00, 0xBD, 0XBD};
+	sendCharSet(msg, sizeof(msg));
+}
+
+/****************************************************************
+* Get Tag Protocol (63h)
+*****************************************************************/
+void rGetTagProtocol() {
+	unsigned char msg[]={0xFF, 0x00, 0x63, 0x1D, 0x6C};
+	sendCharSet(msg, sizeof(msg));
+}
+
+/****************************************************************
+* Get Region (67h)
+*****************************************************************/
+void rGetRegion() {
+	unsigned char msg[]={0xFF, 0x00, 0x67, 0x1D, 0x68};
+	sendCharSet(msg, sizeof(msg));
 }
 
 /****************************************************************
 * Set Tag Protocol (93h)
 *****************************************************************/
-void rfidSetTagProtocol() {
+void rSetTagProtocol() {
 	unsigned char msg[]={0xFF, 0x02, 0x93, 0x00, 0x05, 0x51, 0x7D};
-	sendCharSet(msg, 7);
+	sendCharSet(msg, sizeof(msg));
 }
 
 /****************************************************************
 * Set Region (97h)
 *****************************************************************/
-void rfidSetAntenna() {
+void rSetRegion() {
 	unsigned char msg[]={0xFF, 0x01, 0x97, 0x01, 0x4B, 0xBC};
-	sendCharSet(msg, 6);
+	sendCharSet(msg, sizeof(msg));
 }
 
 /****************************************************************
 * Set Antenna (91h)
 *****************************************************************/
-void rfidSetAntenna() {
+void rSetAntenna() {
 	unsigned char msg[]={0xFF, 0x02, 0x91, 0x01, 0x01, 0x70, 0x3B};
-	sendCharSet(msg, 7);
+	sendCharSet(msg, sizeof(msg));
 }
 
 /****************************************************************
 * Read Single (21h)
 *****************************************************************/
-void rfidReadSingle() {
+void rReadSingle() {
 	unsigned char msg[]={0xFF, 0x02, 0x21, 0x03, 0xE8, 0xD5, 0x09};
-	sendCharSet(msg, 7);
+	sendCharSet(msg, sizeof(msg));
 }
 
 /****************************************************************
 * Read Multiple (22h)
 *****************************************************************/
-void rfidReadMultiple() {
+void rReadMultiple() {
 	unsigned char msg[]={0xFF, 0x02, 0x22, 0x03, 0xE8, 0xE5, 0x6A};
-	sendCharSet(msg, 7);
+	sendCharSet(msg, sizeof(msg));
 }
