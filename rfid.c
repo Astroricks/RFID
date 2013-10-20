@@ -27,12 +27,16 @@ void rSetAntenna();
 void rSetRegion();
 void rGetAntenna();
 void rGetRegion();
+void rClearTagBuffer();
 
 int keepgoing = 1;	// Set to 0 when ctrl-c is pressed
 
 pthread_t tid[1];
 
 
+/****************************************************************
+* Main
+****************************************************************/
 void* receiveThread(void *arg)
 {
     unsigned long i = 0;
@@ -88,13 +92,17 @@ int main(){
 	sleep(1);
 	rGetTagProtocol();
 	while(keepgoing){
+		rClearTagBuffer();
 		sleep(1);
-        printf("\n Sending start\n");
-	//rGetFirmware();
+		rGetProgram();
+		//sleep(1);
+		//rBootFirmware();
+        //printf("\n Sending start\n");
+		//rGetFirmware();
 		//rReadSingle();
 		rReadMultiple();
 		//rGetProgram();
-		sleep(1);
+		usleep(50000);
 	}
 	return 0;
 }
@@ -268,6 +276,7 @@ void signal_handler(int sig) {
 void rGetFirmware() {
 	unsigned char msg[]={0xFF, 0x00, 0x03, 0x1D, 0x0C};
 	sendCharSet(msg, sizeof(msg));
+	printf("Get firmware\n");
 }
 
 /****************************************************************
@@ -276,7 +285,8 @@ void rGetFirmware() {
 void rBootFirmware() {
 	unsigned char msg[]={0xFF, 0x00, 0x04, 0x1D, 0x0B};
 	sendCharSet(msg, sizeof(msg));
-	sleep(1);
+	printf("Boot firmware\n");
+	sleep(2);
 }
 
 /****************************************************************
@@ -284,6 +294,7 @@ void rBootFirmware() {
 *****************************************************************/
 void rGetProgram() {
 	unsigned char msg[]={0xFF, 0x00, 0x0C, 0x1D, 0x03};
+	printf("Get program\n");
 	sendCharSet(msg, sizeof(msg));
 }
 
@@ -292,6 +303,7 @@ void rGetProgram() {
 *****************************************************************/
 void rGetAntenna() {
 	unsigned char msg[]={0xFF, 0x01, 0x61, 0x00, 0xBD, 0XBD};
+	printf("Get antenna\n");
 	sendCharSet(msg, sizeof(msg));
 }
 
@@ -300,6 +312,7 @@ void rGetAntenna() {
 *****************************************************************/
 void rGetTagProtocol() {
 	unsigned char msg[]={0xFF, 0x00, 0x63, 0x1D, 0x6C};
+	printf("Get tag protocol\n");
 	sendCharSet(msg, sizeof(msg));
 }
 
@@ -308,6 +321,7 @@ void rGetTagProtocol() {
 *****************************************************************/
 void rGetRegion() {
 	unsigned char msg[]={0xFF, 0x00, 0x67, 0x1D, 0x68};
+	printf("Get region\n");
 	sendCharSet(msg, sizeof(msg));
 }
 
@@ -316,6 +330,7 @@ void rGetRegion() {
 *****************************************************************/
 void rSetTagProtocol() {
 	unsigned char msg[]={0xFF, 0x02, 0x93, 0x00, 0x05, 0x51, 0x7D};
+	printf("Set tag protocol\n");
 	sendCharSet(msg, sizeof(msg));
 }
 
@@ -324,6 +339,7 @@ void rSetTagProtocol() {
 *****************************************************************/
 void rSetRegion() {
 	unsigned char msg[]={0xFF, 0x01, 0x97, 0x01, 0x4B, 0xBC};
+	printf("Set region\n");
 	sendCharSet(msg, sizeof(msg));
 }
 
@@ -332,6 +348,7 @@ void rSetRegion() {
 *****************************************************************/
 void rSetAntenna() {
 	unsigned char msg[]={0xFF, 0x02, 0x91, 0x01, 0x01, 0x70, 0x3B};
+	printf("Set antenna\n");
 	sendCharSet(msg, sizeof(msg));
 }
 
@@ -340,6 +357,7 @@ void rSetAntenna() {
 *****************************************************************/
 void rReadSingle() {
 	unsigned char msg[]={0xFF, 0x02, 0x21, 0x03, 0xE8, 0xD5, 0x09};
+	printf("Read single tag\n");
 	sendCharSet(msg, sizeof(msg));
 }
 
@@ -348,5 +366,15 @@ void rReadSingle() {
 *****************************************************************/
 void rReadMultiple() {
 	unsigned char msg[]={0xFF, 0x02, 0x22, 0x03, 0xE8, 0xE5, 0x6A};
+	printf("Read multiple tags\n");
+	sendCharSet(msg, sizeof(msg));
+}
+
+/****************************************************************
+* Clear Tag Buffer (2Ah)
+*****************************************************************/
+void rClearTagBuffer() {
+	unsigned char msg[]={0xFF, 0x00, 0x2A, 0x1D, 0x25};
+	printf("Clear tag buffer\n");
 	sendCharSet(msg, sizeof(msg));
 }
