@@ -10,7 +10,7 @@
 #define ARRAY_SIZE 16
 
 int initUART1_TXD();
-int initUART1_RXD();
+int initUART2_RXD();
 int setSerial();
 int readCharSet();
 int sendCharSet(unsigned char *msg, int size);
